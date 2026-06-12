@@ -99,5 +99,7 @@
 - Chart.js
 
 ---
-<img width="540" height="687" alt="6827deac-5a21-450f-8fc1-5c575e5c0e7e" src="https://github.com/user-attachments/assets/9d8e7891-1ed5-4443-994c-e06bf454680c" />
+<img width="1920" height="1080" alt="Снимок экрана (11)" src="https://github.com/user-attachments/assets/06c5aff2-0fc9-478c-bc95-ea48cf0a8459" />
+<img width="1920" height="1080" alt="Снимок экрана (10)" src="https://github.com/user-attachments/assets/14593297-cb61-45fd-9ef2-ae7f8060d23d" />
+
 
