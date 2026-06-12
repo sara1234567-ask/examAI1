@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Sentiment Analyzer</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    background: #0f172a;
+    color: white;
+}
+
+.card {
+    background: #597db7;
+    border: none;
+    border-radius: 15px;
+}
+
+textarea {
+    resize: none;
+}
+
+.result-box {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.positive { color: #22c55e; }
+.negative { color: #ef4444; }
+.neutral { color: #facc15; }
+
+/* 🔥 УМЕНЬШАЕМ ГРАФИК */
+#chart {
+    max-width: 260px;
+    max-height: 260px;
+    margin: 0 auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+<h1 class="text-center mb-4">🧠 AI Sentiment Analyzer</h1>
+
+<!-- INPUT -->
+<div class="card p-4 mb-3">
+
+<textarea id="text" class="form-control mb-3" rows="4" placeholder="Enter text..."></textarea>
+
+<button onclick="send()" class="btn btn-primary w-100">Analyze</button>
+
+<button onclick="clearHistory()" class="btn btn-danger w-100 mt-2">
+🗑 Clear History
+</button>
+
+</div>
+
+<!-- RESULT -->
+<div class="card p-4 mb-3 text-center">
+<div id="result" class="result-box">Result will appear here</div>
+</div>
+
+<!-- CHART -->
+<div class="card p-4 mb-3 text-center">
+<h5>📊 Sentiment Statistics</h5>
+
+<div style="max-width: 260px; margin: auto;">
+<canvas id="chart"></canvas>
+</div>
+
+</div>
+
+<!-- HISTORY -->
+<div class="card p-4">
+<h4>History</h4>
+<div id="history"></div>
+</div>
+
+</div>
+
+<script>
+
+let chartInstance = null;
+
+// ---------------- SEND ----------------
+async function send() {
+
+const text = document.getElementById("text").value.trim();
+if (!text) return alert("Enter text");
+
+const res = await fetch("http://127.0.0.1:5000/analyze", {
+method: "POST",
+headers: {"Content-Type": "application/json"},
+body: JSON.stringify({ text })
+});
+
+const data = await res.json();
+
+let color = "neutral";
+if (data.result === "positive") color = "positive";
+if (data.result === "negative") color = "negative";
+
+document.getElementById("result").innerHTML =
+`<span class="${color}">
+${data.result} (${Number(data.confidence).toFixed(2)})
+</span>`;
+
+document.getElementById("text").value = "";
+
+loadHistory();
+loadChart();
+}
+
+// ---------------- HISTORY ----------------
+async function loadHistory() {
+
+const res = await fetch("http://127.0.0.1:5000/results");
+const data = await res.json();
+
+let html = "";
+
+data.forEach(r => {
+html += `
+<div class="border-bottom py-2">
+<b>${r.text}</b><br>
+${r.result} (${Number(r.confidence).toFixed(2)})<br>
+<small>${r.time}</small>
+</div>
+`;
+});
+
+document.getElementById("history").innerHTML = html;
+}
+
+// ---------------- CLEAR ----------------
+async function clearHistory() {
+
+if (!confirm("Clear history?")) return;
+
+await fetch("http://127.0.0.1:5000/clear", {
+method: "POST"
+});
+
+document.getElementById("history").innerHTML = "";
+
+loadChart();
+}
+
+// ---------------- CHART ----------------
+async function loadChart() {
+
+const res = await fetch("http://127.0.0.1:5000/results");
+const data = await res.json();
+
+let p = 0, n = 0, neu = 0;
+
+data.forEach(r => {
+if (r.result === "positive") p++;
+else if (r.result === "negative") n++;
+else neu++;
+});
+
+const ctx = document.getElementById("chart").getContext("2d");
+
+if (chartInstance) chartInstance.destroy();
+
+chartInstance = new Chart(ctx, {
+type: "pie",
+data: {
+labels: ["Positive", "Negative", "Neutral"],
+datasets: [{
+data: [p, n, neu],
+backgroundColor: ["#22c55e", "#ef4444", "#facc15"]
+}]
+}
+});
+}
+
+// ---------------- INIT ----------------
+window.onload = function () {
+loadHistory();
+loadChart();
+};
+
+</script>
+
+</body>
+</html>
