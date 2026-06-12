@@ -99,4 +99,5 @@
 - Chart.js
 
 ---
+<img width="540" height="687" alt="6827deac-5a21-450f-8fc1-5c575e5c0e7e" src="https://github.com/user-attachments/assets/9d8e7891-1ed5-4443-994c-e06bf454680c" />
 
